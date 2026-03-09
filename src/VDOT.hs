@@ -1,9 +1,15 @@
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
+
 -- vdot formula:
 -- | module comment
 --
 -- thanks to Larry Simpson for providing [formula](http://www.simpsonassociatesinc.com/runningmath1.htm)
--- and Daniels/Gilbert for creating formula :)
+-- and Daniels/Gilbert for formula
 module VDOT where
+
+import           Data.Aeson   (ToJSON)
+import           GHC.Generics (Generic)
 
 data RaceDistance
   = FiveK
@@ -16,6 +22,12 @@ data RaceDistance
 type VDOT = Double
 
 type RaceTime = Integer -- TODO: decide on Double or Integer. int most clean
+
+data Result = Result
+  { raceVDOT :: Double
+  , equivHM  :: (Integer, Integer, Integer) -- messy
+  , paces    :: [String]
+  } deriving (Generic, ToJSON)
 
 distanceNumerical :: RaceDistance -> Double
 distanceNumerical FiveK              = 5000
@@ -61,15 +73,8 @@ bisect f target low high
 -- to look up what is equivalent, so need to search through vdots until we get
 -- a distance+time which gives an equal vdot (0.01 margin)
 equivalentTime :: VDOT -> RaceDistance -> Integer
-equivalentTime vdot distance =
+equivalentTime vdot distance
   -- range now 1 second to 24 hours
   -- expected use for calculator is 1500 to marathon. Should it be hard limit
   -- on 1500 WR to normal marathon cut-off time?
-  round $ bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
-
-
-
-
-
-
-
+ = round $ bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
