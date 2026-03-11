@@ -35,6 +35,7 @@ library
     exposed-modules: VDOT
                    , PaceRange
                    , App
+                   , Html
     build-depends: aeson
               , wai
               , warp
@@ -42,4 +43,7 @@ library
               , lucid
               , servant
               , servant-server
+              , lucid
+              , servant-lucid
+              , text
 
