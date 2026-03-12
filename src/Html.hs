@@ -18,7 +18,7 @@ index = do
       h1_ "My calc"
       form_ [action_ "/result", method_ "get"] do
       label_ "Time"
-      input_ [type_ "number", name_ "time"]--, value_ "1080"]
+      input_ [type_ "text", name_ "time", placeholder_ "18:30"]
       label_ "Distance"
       select_ [name_ "dist"] do
         option_ [value_ "5k"] "5km"
@@ -28,16 +28,18 @@ index = do
 
 
 
-
-resultPage :: VDOT -> (Integer, Integer, Integer) -> Html ()
-resultPage vdot (h, m, s) = do
+-- todo ?
+-- RaceTime :: Text
+-- or InputTime :: Text
+resultPage :: VDOT -> Text -> Html ()
+resultPage vdot timeText = do
   html_ do
       head_ do
           title_ "calc (slang for calculator)"
       body_ do
           h1_ "result"
           p_ $ "vdot: " >> toHtml (show vdot)
-          p_ $ "hm time: " >> toHtml (show h ++ ":" ++ show m ++ ":" ++ show s)
+          p_ $ "hm time: " >> toHtml timeText
           a_ [href_ "/"] "go back"
 
 someText :: Text

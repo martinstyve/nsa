@@ -36,6 +36,7 @@ library
                    , PaceRange
                    , App
                    , Html
+                   , Parser
     build-depends: aeson
               , wai
               , warp
@@ -46,4 +47,5 @@ library
               , lucid
               , servant-lucid
               , text
+              , megaparsec
 
