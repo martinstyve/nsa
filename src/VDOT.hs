@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
 
 -- vdot formula:
 -- | module comment
@@ -7,9 +5,6 @@
 -- thanks to Larry Simpson for providing [formula](http://www.simpsonassociatesinc.com/runningmath1.htm)
 -- and Daniels/Gilbert for formula
 module VDOT where
-
-import           Data.Aeson   (ToJSON)
-import           GHC.Generics (Generic)
 
 data RaceDistance
   = FiveK
@@ -23,12 +18,6 @@ type VDOT = Double
 
 type RaceTime = Integer -- TODO: decide on Double or Integer. int most clean
 
-data Result = Result
-  { raceVDOT :: Double
-  , equivHM  :: (Integer, Integer, Integer) -- messy
-  , paces    :: [String]
-  } deriving (Generic, ToJSON)
-
 distanceNumerical :: RaceDistance -> Double
 distanceNumerical FiveK              = 5000
 distanceNumerical TenK               = 10000
@@ -38,12 +27,12 @@ distanceNumerical (CustomDistance n) = n
 
 -- temporary (i hope)
 -- (hours, minutes, seconds)
-secToHMS :: Integer -> (Integer, Integer, Integer)
-secToHMS n = (h, m, s)
-  where
-    h = n `div` 3600
-    m = n `mod` 3600 `div` 60
-    s = n `mod` 60
+-- secToHMS :: Integer -> (Integer, Integer, Integer)
+-- secToHMS n = (h, m, s)
+--   where
+--     h = n `div` 3600
+--     m = n `mod` 3600 `div` 60
+--     s = n `mod` 60
 
 -- | formula found through link at top of module
 -- oxygen cost formula on page 2
