@@ -43,9 +43,11 @@ server = homeHandler :<|> calcHandler
           let totalSeconds = fromIntegral $ Parser.runTimeToSec runTime
           let dist = parseDist d
           let vdot = calculateVDOT totalSeconds dist
-          let hmTime = equivalentTime vdot HalfMarathon
-          let formattedHM = Parser.formatRunTime hmTime
-          return $ Html.resultPage vdot formattedHM
+          let raceTable = [ ("5k", Parser.formatRunTime (equivalentTime vdot FiveK))
+                          , ("10k", Parser.formatRunTime (equivalentTime vdot TenK))
+                          , ("Half", Parser.formatRunTime (equivalentTime vdot HalfMarathon))
+                          ]
+          return $ Html.resultPage vdot raceTable
 
     calcHandler _ _ = return Html.index
 

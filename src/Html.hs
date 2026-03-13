@@ -23,6 +23,7 @@ index = do
       select_ [name_ "dist"] do
         option_ [value_ "5k"] "5km"
         option_ [value_ "10k"] "10km"
+        -- HM missing
         option_ [value_ "marathon"] "marathon"
       button_ [type_ "submit"] "find vdot"
 
@@ -31,17 +32,14 @@ index = do
 -- todo ?
 -- RaceTime :: Text
 -- or InputTime :: Text
-resultPage :: VDOT -> Text -> Html ()
-resultPage vdot timeText = do
+resultPage :: VDOT -> [(Text, Text)] -> Html ()
+resultPage vdot raceTable = do
   html_ do
-      head_ do
-          title_ "calc (slang for calculator)"
-      body_ do
-          h1_ "result"
-          p_ $ "vdot: " >> toHtml (show vdot)
-          p_ $ "hm time: " >> toHtml timeText
-          a_ [href_ "/"] "go back"
-
-someText :: Text
-someText = "good luck"
-
+    head_ $ title_ "calc (slang for calculator)"
+    body_ do
+      h1_ "result"
+      p_ $ "VDOT: " >> toHtml (show vdot)
+      h2_ "equiv race times"
+      table_ do
+        mapM_ (\(d, t) -> tr_ (td_ (toHtml d) >> td_ (toHtml t))) raceTable
+      a_ [href_ "/"] "go back"
