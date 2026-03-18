@@ -37,7 +37,8 @@ library
                    , App
                    , Html
                    , Parser
-    build-depends: aeson
+    build-depends: containers
+              , aeson
               , wai
               , warp
               , base

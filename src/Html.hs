@@ -9,13 +9,17 @@ import           PaceRange
 import           VDOT
 
 index :: Html ()
-index = do
+index = indexMaybeError Nothing
+
+indexMaybeError :: Maybe Text -> Html ()
+indexMaybeError maybeError = do
   html_ do
     head_ do
       title_ "hello haskell"
       style_ "body { background-color: green; }"
     body_ do
       h1_ "My calc"
+      maybe mempty (p_ . toHtml) maybeError
       form_ [action_ "/result", method_ "get"] do
       label_ "Time"
       input_ [type_ "text", name_ "time", placeholder_ "18:30"]
@@ -23,8 +27,8 @@ index = do
       select_ [name_ "dist"] do
         option_ [value_ "5k"] "5km"
         option_ [value_ "10k"] "10km"
-        -- HM missing
-        option_ [value_ "marathon"] "marathon"
+        option_ [value_ "half"] "Half Marathon"
+        option_ [value_ "marathon"] "Marathon"
       button_ [type_ "submit"] "find vdot"
 
 

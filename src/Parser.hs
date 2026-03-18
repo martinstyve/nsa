@@ -2,50 +2,64 @@
 module Parser where
 
 import Data.Text
-import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char
-import qualified Text.Megaparsec.Char.Lexer as L
-import Control.Applicative
+import VDOT
+
+import Data.List.NonEmpty as NE
+import Data.Set as Set
 
 data RunTime
   = MS Int Int -- mm:ss
   | HMS Int Int Int -- h:mm:ss
   deriving (Show, Eq)
 
-type Parser = Parsec Void Text
+data InputError 
+  = InvalidSeconds 
+  | InvalidMinutes
+  | InvalidDistance
+  | InvalidFormat 
+  deriving (Show, Eq, Ord)
 
-twoDigits :: Parser Int
-twoDigits = do
-  first <- digitChar
-  second <- digitChar
-  return $ read [first, second]
+type Parser = Parsec InputError Text
 
 digits :: Parser Int
-digits = L.decimal
-
-hmsParser :: Parser RunTime
-hmsParser = do
-  hours <- digits
-  _ <- char ':'
-  minutes <- twoDigits
-  _ <- char ':'
-  seconds <- twoDigits
-  if minutes >= 60
-    then fail "minutes over 60 sec"
-    else if seconds >= 60
-      then fail "seconds over 60 sec"
-      else return $ HMS hours minutes seconds
-
-msParser :: Parser RunTime
-msParser = do
-  minutes <- digits
-  _ <- char ':'
-  seconds <- twoDigits
-  if seconds >= 60 then fail "over 60 sec" else return $ MS minutes seconds
+digits = read <$> some digitChar
 
 timeParser :: Parser RunTime
-timeParser = try hmsParser <|> msParser
+timeParser = do
+  parts <- digits `sepBy1` char ':'
+  case parts of
+    [m, s]    | s < 60 -> pure (MS m s)
+    [h, m, s] | m < 60 && s < 60 -> pure (HMS h m s)
+    _         -> customFailure InvalidFormat
+
+distanceParser :: Parser RaceDistance
+distanceParser = choice
+  [ FiveK <$ "5k"
+  , TenK <$ "10k"
+  , HalfMarathon <$ "half"
+  , Marathon <$ "marathon"
+  ] <|> customFailure InvalidDistance
+
+parseTime :: Text -> Either InputError RunTime
+parseTime = either (Left . bundleToInputError) Right . runParser timeParser ""
+
+parseDistance :: Text -> Either InputError RaceDistance
+parseDistance = either (Left . bundleToInputError) Right . runParser distanceParser ""
+
+bundleToInputError :: ParseErrorBundle Text InputError -> InputError
+bundleToInputError bundle =
+  case [err | FancyError _ ms <- NE.toList (bundleErrors bundle)
+            , ErrorCustom err <- Set.toList ms ] of
+    (e:_) -> e
+    [] -> InvalidFormat
+
+inputErrorText :: InputError -> Text
+inputErrorText InvalidSeconds = "expected seconds 00-59"
+inputErrorText InvalidMinutes = "expected minutes 00-59"
+inputErrorText InvalidDistance = "choose distance from dropdown"
+inputErrorText InvalidFormat = "use format h:mm:ss or mm:ss"
 
 -- move this and keep Parser solely from text parsing
 runTimeToSec :: RunTime -> Integer

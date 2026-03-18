@@ -11,13 +11,12 @@ import           Servant
 import           Servant.HTML.Lucid
 
 import           Data.Text                (Text)
-import           Text.Megaparsec          (runParser)
 
 
 import           Html
 import           PaceRange
 import           VDOT
-import Parser
+import Parser as P
 
 -- servant docs tutorial and source code
 -- https://docs.servant.dev/en/latest/tutorial/
@@ -37,24 +36,20 @@ server = homeHandler :<|> calcHandler
     homeHandler = return Html.index
 
     calcHandler (Just t) (Just d) = do  
-      case runParser Parser.timeParser "" t of
-        Left _ -> return Html.index
-        Right runTime -> do
-          let totalSeconds = fromIntegral $ Parser.runTimeToSec runTime
-          let dist = parseDist d
+      case (P.parseTime t, P.parseDistance d) of
+        (Left err, _) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
+        (_, Left err) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
+        (Right runTime, Right dist) -> do
+          let totalSeconds = fromIntegral $ P.runTimeToSec runTime
           let vdot = calculateVDOT totalSeconds dist
-          let raceTable = [ ("5k", Parser.formatRunTime (equivalentTime vdot FiveK))
-                          , ("10k", Parser.formatRunTime (equivalentTime vdot TenK))
-                          , ("Half", Parser.formatRunTime (equivalentTime vdot HalfMarathon))
+          let raceTable = [ ("5k", P.formatRunTime (equivalentTime vdot FiveK))
+                          , ("10k", P.formatRunTime (equivalentTime vdot TenK))
+                          , ("half", P.formatRunTime (equivalentTime vdot HalfMarathon))
+                          , ("marathon", P.formatRunTime (equivalentTime vdot Marathon))
                           ]
           return $ Html.resultPage vdot raceTable
 
     calcHandler _ _ = return Html.index
-
-    parseDist "5k"       = FiveK -- TODO: parse
-    parseDist "10k"      = TenK
-    parseDist "marathon" = Marathon
-    parseDist _          = FiveK
 
 app :: Application
 app = serve api server
