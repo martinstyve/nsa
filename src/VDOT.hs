@@ -50,6 +50,7 @@ calculateVDOT time distance = o2cost / dropDead
         + 0.1894393 * exp (-(0.012778 * t))
         + 0.8
 
+-- todo generic num
 bisect :: (Double -> Double) -> Double -> Double -> Double -> Double
 bisect f target low high
   | (high - low) < 0.01 = mid
