@@ -4,15 +4,11 @@ module Parser where
 import Data.Text
 import Text.Megaparsec
 import Text.Megaparsec.Char
+import RunTime
 import VDOT
 
 import Data.List.NonEmpty as NE
 import Data.Set as Set
-
-data RunTime
-  = MS Int Int -- mm:ss
-  | HMS Int Int Int -- h:mm:ss
-  deriving (Show, Eq)
 
 data InputError 
   = InvalidSeconds 
@@ -60,20 +56,4 @@ inputErrorText InvalidSeconds = "expected seconds 00-59"
 inputErrorText InvalidMinutes = "expected minutes 00-59"
 inputErrorText InvalidDistance = "choose distance from dropdown"
 inputErrorText InvalidFormat = "use format h:mm:ss or mm:ss"
-
--- move this and keep Parser solely from text parsing
-runTimeToSec :: RunTime -> Integer
-runTimeToSec (MS m s) = fromIntegral (m * 60 + s)
-runTimeToSec (HMS h m s) = fromIntegral (h * 3600 + m * 60 + s)
-
-formatRunTime :: Integer -> Text
-formatRunTime totalSeconds = pack $
-  if hours > 0 
-    then show hours ++ ":" ++ zeroPad mins ++ ":" ++ zeroPad secs
-    else zeroPad mins ++ ":" ++ zeroPad secs
-  where
-    hours = totalSeconds `div` 3600
-    mins  = (totalSeconds `mod` 3600) `div` 60
-    secs  = totalSeconds `mod` 60
-    zeroPad n = if n < 10 then "0" ++ show n else show n
 

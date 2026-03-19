@@ -37,6 +37,7 @@ library
                    , App
                    , Html
                    , Parser
+                   , RunTime
     build-depends: containers
               , aeson
               , wai

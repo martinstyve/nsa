@@ -14,9 +14,10 @@ import           Data.Text                (Text)
 
 
 import           Html
-import           PaceRange
+import           PaceRange -- todo
+import           RunTime as RT
 import           VDOT
-import Parser as P
+import           Parser as P
 
 -- servant docs tutorial and source code
 -- https://docs.servant.dev/en/latest/tutorial/
@@ -40,12 +41,12 @@ server = homeHandler :<|> calcHandler
         (Left err, _) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
         (_, Left err) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
         (Right runTime, Right dist) -> do
-          let totalSeconds = fromIntegral $ P.runTimeToSec runTime
+          let totalSeconds = fromIntegral $ RT.runTimeToSec runTime
           let vdot = calculateVDOT totalSeconds dist
-          let raceTable = [ ("5k", P.formatRunTime (equivalentTime vdot FiveK))
-                          , ("10k", P.formatRunTime (equivalentTime vdot TenK))
-                          , ("half", P.formatRunTime (equivalentTime vdot HalfMarathon))
-                          , ("marathon", P.formatRunTime (equivalentTime vdot Marathon))
+          let raceTable = [ ("5k", RT.formatRunTime (equivalentTime vdot FiveK))
+                          , ("10k", RT.formatRunTime (equivalentTime vdot TenK))
+                          , ("half", RT.formatRunTime (equivalentTime vdot HalfMarathon))
+                          , ("marathon", RT.formatRunTime (equivalentTime vdot Marathon))
                           ]
           return $ Html.resultPage vdot raceTable
 
