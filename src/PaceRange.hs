@@ -20,25 +20,34 @@ type Pace = (Integer, Integer)
 calculatePaces :: VDOT -> [PaceRange]
 calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
 
--- todo: find good pace ranges
+-- todo: find good pace ranges. this is manually adjusted to match lactrace
+-- at 18:30 5k
 calculateZonePace :: VDOT -> Zone -> PaceRange
 calculateZonePace vdot zone =
   case zone of
       ShortRep ->
         PaceRange "Short Intervals" 
-                  (equivalentTime (vdot * 1.05) (CustomDistance 1000))
-                  (equivalentTime (vdot * 0.95) (CustomDistance 1000))
+                  (paceAtDistance vdot 15000)
+                  (paceAtDistance vdot 23000)
                   "15k intensity"
       MediumRep ->
         PaceRange "Medium Intervals"
-                  (equivalentTime vdot (CustomDistance 1000))
-                  (equivalentTime (vdot * 0.90) (CustomDistance 1000))
+                  (paceAtDistance vdot 21000)
+                  (paceAtDistance vdot 33000)
                   "HM intensity"
       LongRep ->
         PaceRange "Long Intervals"
-                  (equivalentTime (vdot * 0.85) (CustomDistance 1000))
-                  (equivalentTime (vdot * 0.80) (CustomDistance 1000))
+                  (paceAtDistance vdot 30000)
+                  (paceAtDistance vdot 50000)
                   "30k intensity"
 
--- pacePerKm :: RaceTime -> RaceDistance -> Pace
--- pacePerKm time distance = undefined
+paceAtDistance :: VDOT -> Double -> Integer
+paceAtDistance vdot d = fst $ pacePerKm (equivalentTime vdot (CustomDistance d)) (CustomDistance d)
+
+pacePerKm :: RaceTime -> RaceDistance -> Pace
+pacePerKm time distance = (secondsPerKm, secondsPerKm)
+  where
+    meters = distanceNumerical distance
+    secondsPerKm
+      | meters <= 0 = 0
+      | otherwise = round (fromIntegral time * 1000 / meters)
