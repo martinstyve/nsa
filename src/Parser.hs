@@ -9,12 +9,13 @@ import VDOT
 
 import Data.List.NonEmpty as NE
 import Data.Set as Set
+import Text.Read hiding (choice)
 
-data InputError 
-  = InvalidSeconds 
+data InputError
+  = InvalidSeconds
   | InvalidMinutes
   | InvalidDistance
-  | InvalidFormat 
+  | InvalidFormat
   deriving (Show, Eq, Ord)
 
 type Parser = Parsec InputError Text
@@ -26,17 +27,31 @@ timeParser :: Parser RunTime
 timeParser = do
   parts <- digits `sepBy1` char ':'
   case parts of
-    [m, s]    | s < 60 -> pure (MS m s)
-    [h, m, s] | m < 60 && s < 60 -> pure (HMS h m s)
-    _         -> customFailure InvalidFormat
+    [m, s] -> 
+      if s < 60 
+        then pure (MS m s) 
+        else customFailure InvalidSeconds
+    [h, m, s] -> 
+      if m >= 60 then customFailure InvalidMinutes
+      else if s >= 60 then customFailure InvalidSeconds
+      else pure (HMS h m s)
+    _ -> customFailure InvalidFormat
 
 distanceParser :: Parser RaceDistance
-distanceParser = choice
-  [ FiveK <$ "5k"
-  , TenK <$ "10k"
-  , HalfMarathon <$ "half"
-  , Marathon <$ "marathon"
-  ] <|> customFailure InvalidDistance
+distanceParser = 
+  choice [ FiveK        <$ "5k"
+         , TenK         <$ "10k"
+         , HalfMarathon <$ "half"
+         , Marathon     <$ "marathon"
+         ] 
+  <|> customDistance
+  where
+    customDistance = do
+      ds <- some (digitChar <|> char '.') -- todo comma aswell or only dot
+      case readMaybe ds of
+        Just d  -> pure (CustomDistance d)
+        Nothing -> customFailure InvalidDistance
+
 
 parseTime :: Text -> Either InputError RunTime
 parseTime = either (Left . bundleToInputError) Right . runParser timeParser ""
@@ -44,6 +59,7 @@ parseTime = either (Left . bundleToInputError) Right . runParser timeParser ""
 parseDistance :: Text -> Either InputError RaceDistance
 parseDistance = either (Left . bundleToInputError) Right . runParser distanceParser ""
 
+-- https://hackage.haskell.org/package/megaparsec-9.7.0/docs/Text-Megaparsec-Error.html#g:1
 bundleToInputError :: ParseErrorBundle Text InputError -> InputError
 bundleToInputError bundle =
   case [err | FancyError _ ms <- NE.toList (bundleErrors bundle)

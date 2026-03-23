@@ -18,15 +18,17 @@ import           PaceRange -- todo
 import           RunTime as RT
 import           VDOT
 import           Parser as P
+import Data.Maybe (fromMaybe)
 
 -- servant docs tutorial and source code
 -- https://docs.servant.dev/en/latest/tutorial/
 -- https://github.com/haskell-servant/
 -- https://docs.servant.dev/en/latest/tutorial/ApiType.html 06.03.26
 
+-- todo params must be RunTime and RaceDistance types
 type API = 
     Get '[HTML] (Html ()) 
-    :<|> "result" :> QueryParam "time" Text :> QueryParam "dist" Text :> Get '[HTML] (Html ())
+    :<|> "result" :> QueryParam "time" Text :> QueryParam "dist" Text :> QueryParam "custom_dist" Text :> Get '[HTML] (Html ())
 
 api :: Proxy API
 api = Proxy
@@ -36,8 +38,9 @@ server = homeHandler :<|> calcHandler
   where
     homeHandler = return Html.index
 
-    calcHandler (Just t) (Just d) = do  
-      case (P.parseTime t, P.parseDistance d) of
+    calcHandler (Just t) (Just d) customD = do
+      let distToParse = if d == "custom" then fromMaybe "" customD else d
+      case (P.parseTime t, P.parseDistance distToParse) of
         (Left err, _) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
         (_, Left err) -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
         (Right runTime, Right dist) -> do
@@ -48,9 +51,10 @@ server = homeHandler :<|> calcHandler
                           , ("half", RT.formatRunTime (equivalentTime vdot HalfMarathon))
                           , ("marathon", RT.formatRunTime (equivalentTime vdot Marathon))
                           ]
-          return $ Html.resultPage vdot raceTable
+          let intervalPaces = calculatePaces vdot
+          return $ Html.resultPage vdot raceTable intervalPaces
 
-    calcHandler _ _ = return Html.index
+    calcHandler _ _ _ = return Html.index
 
 app :: Application
 app = serve api server
