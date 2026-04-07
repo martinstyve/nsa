@@ -35,8 +35,6 @@ indexMaybeError maybeError = do
             option_ [value_ "10k"] "10km"
             option_ [value_ "half"] "Half Marathon"
             option_ [value_ "marathon"] "Marathon"
-            option_ [value_ "custom"] "Custom Distance"
-        input_ [type_ "text", name_ "custom", placeholder_ "e.g. 8.5"]
         button_ [type_ "submit"] "find vdot"
 
 

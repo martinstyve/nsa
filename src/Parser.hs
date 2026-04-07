@@ -9,12 +9,10 @@ import VDOT
 
 import Data.List.NonEmpty as NE
 import Data.Set as Set
-import Text.Read hiding (choice)
 
 data InputError
   = InvalidSeconds
   | InvalidMinutes
-  | InvalidDistance
   | InvalidFormat
   deriving (Show, Eq, Ord)
 
@@ -43,14 +41,7 @@ distanceParser =
          , TenK         <$ "10k"
          , HalfMarathon <$ "half"
          , Marathon     <$ "marathon"
-         ] 
-  <|> customDistance
-  where
-    customDistance = do
-      ds <- some (digitChar <|> char '.') -- todo comma aswell or only dot
-      case readMaybe ds of
-        Just d  -> pure (CustomDistance d)
-        Nothing -> customFailure InvalidDistance
+         ]
 
 
 parseTime :: Text -> Either InputError RunTime
@@ -70,6 +61,5 @@ bundleToInputError bundle =
 inputErrorText :: InputError -> Text
 inputErrorText InvalidSeconds = "expected seconds 00-59"
 inputErrorText InvalidMinutes = "expected minutes 00-59"
-inputErrorText InvalidDistance = "choose distance from dropdown"
 inputErrorText InvalidFormat = "use format h:mm:ss or mm:ss"
 
