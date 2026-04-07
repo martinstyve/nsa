@@ -72,5 +72,5 @@ app = serve api server
 
 startApp :: IO ()
 startApp = do
-  putStrLn "visit http://localhost:3000"
-  run 3000 app
+  putStrLn "visit http://localhost:6767"
+  run 6767 app
