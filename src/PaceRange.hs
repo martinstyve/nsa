@@ -15,7 +15,23 @@ data PaceRange = PaceRange
   , intensity :: String
   } deriving (Show, Eq)
 
-type Pace = (Int, Int)
+type Pace = (Int, Int) -- (Minutes, Seconds)
+
+toPace :: Int -> Pace
+toPace totalSec = (totalSec `div` 60, totalSec `mod` 60)
+
+pacePerKm :: Int -> RaceDistance -> Int
+pacePerKm time distance
+  | meters <= 0 = 0
+  | otherwise = round (fromIntegral time * 1000 / meters)
+  where
+    meters = distanceNumerical distance
+
+paceAtDistance :: VDOT -> Double -> Int
+paceAtDistance vdot d =
+  let dist = CustomDistance d
+      time = equivalentTime vdot dist
+   in pacePerKm time dist
 
 calculatePaces :: VDOT -> [PaceRange]
 calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
@@ -25,29 +41,24 @@ calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
 calculateZonePace :: VDOT -> Zone -> PaceRange
 calculateZonePace vdot zone =
   case zone of
-      ShortRep ->
-        PaceRange "Short Intervals" 
-                  (paceAtDistance vdot 15000)
-                  (paceAtDistance vdot 23000)
-                  "15k intensity"
-      MediumRep ->
-        PaceRange "Medium Intervals"
-                  (paceAtDistance vdot 21000)
-                  (paceAtDistance vdot 33000)
-                  "HM intensity"
-      LongRep ->
-        PaceRange "Long Intervals"
-                  (paceAtDistance vdot 30000)
-                  (paceAtDistance vdot 50000)
-                  "30k intensity"
-
-paceAtDistance :: VDOT -> Double -> Int
-paceAtDistance vdot d = fst $ pacePerKm (equivalentTime vdot (CustomDistance d)) (CustomDistance d)
-
-pacePerKm :: RaceTime -> RaceDistance -> Pace
-pacePerKm time distance = (secondsPerKm, secondsPerKm)
-  where
-    meters = distanceNumerical distance
-    secondsPerKm
-      | meters <= 0 = 0
-      | otherwise = round (fromIntegral time * 1000 / meters)
+    ShortRep ->
+      PaceRange
+        { name = "Short Intervals"
+        , minPace = paceAtDistance vdot 15000
+        , maxPace = paceAtDistance vdot 23000
+        , intensity = "15k intensity"
+        }
+    MediumRep ->
+      PaceRange
+        { name = "Medium Intervals"
+        , minPace = paceAtDistance vdot 21000
+        , maxPace = paceAtDistance vdot 33000
+        , intensity = "HM intensity"
+        }
+    LongRep ->
+      PaceRange
+        { name = "Long Intervals"
+        , minPace = paceAtDistance vdot 30000
+        , maxPace = paceAtDistance vdot 50000
+        , intensity = "30k intensity"
+        }

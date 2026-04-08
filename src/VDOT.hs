@@ -1,11 +1,10 @@
+module VDOT where
 
 -- vdot formula:
 -- | module comment
 --
 -- thanks to Larry Simpson for providing [formula](http://www.simpsonassociatesinc.com/runningmath1.htm)
 -- and Daniels/Gilbert for formula
-module VDOT where
-
 data RaceDistance
   = FiveK
   | TenK
@@ -19,20 +18,11 @@ type VDOT = Double
 type RaceTime = Int -- TODO: decide on Double or Integer. int most clean
 
 distanceNumerical :: RaceDistance -> Double
-distanceNumerical FiveK              = 5000
-distanceNumerical TenK               = 10000
-distanceNumerical Marathon           = 42195
-distanceNumerical HalfMarathon       = distanceNumerical Marathon / 2
+distanceNumerical FiveK              = 5000.0
+distanceNumerical TenK               = 10000.0
+distanceNumerical Marathon           = 42195.0
+distanceNumerical HalfMarathon       = 21097.5
 distanceNumerical (CustomDistance n) = n
-
--- temporary (i hope)
--- (hours, minutes, seconds)
--- secToHMS :: Integer -> (Integer, Integer, Integer)
--- secToHMS n = (h, m, s)
---   where
---     h = n `div` 3600
---     m = n `mod` 3600 `div` 60
---     s = n `mod` 60
 
 -- | formula found through link at top of module
 -- oxygen cost formula on page 2

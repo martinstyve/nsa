@@ -1,5 +1,7 @@
 module RunTime where
-import Data.Text (Text, pack)
+
+import           Data.Text   (Text, pack)
+import           Text.Printf (printf)
 
 data RunTime
   = MS Int Int -- mm:ss
@@ -13,13 +15,9 @@ runTimeToSec (HMS h m s) = h * 3600 + m * 60 + s
 formatRunTime :: Int -> Text
 formatRunTime totalSeconds = pack $
   if hours > 0
-    then show hours ++ ":" ++ zeroPad mins ++ ":" ++ zeroPad secs
-    else zeroPad mins ++ ":" ++ zeroPad secs
+    then printf "%d:%02d:%02d" hours mins secs
+    else printf "%d:%02d" mins secs
   where
     hours = totalSeconds `div` 3600
     mins = (totalSeconds `mod` 3600) `div` 60
     secs = totalSeconds `mod` 60
-    zeroPad n =
-      if n < 10
-        then "0" ++ show n
-        else show n
