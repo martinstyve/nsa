@@ -16,7 +16,7 @@ data RaceDistance
 
 type VDOT = Double
 
-type RaceTime = Integer -- TODO: decide on Double or Integer. int most clean
+type RaceTime = Int -- TODO: decide on Double or Integer. int most clean
 
 distanceNumerical :: RaceDistance -> Double
 distanceNumerical FiveK              = 5000
@@ -62,7 +62,7 @@ bisect f target low high
 -- | calculate other times from a given VDOT, but we dont have a formula or table
 -- to look up what is equivalent, so need to search through vdots until we get
 -- a distance+time which gives an equal vdot (0.01 margin)
-equivalentTime :: VDOT -> RaceDistance -> Integer
+equivalentTime :: VDOT -> RaceDistance -> Int
 equivalentTime vdot distance
   -- range now 1 second to 24 hours
   -- expected use for calculator is 1500 to marathon. Should it be hard limit

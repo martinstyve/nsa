@@ -10,12 +10,12 @@ data Zone
 
 data PaceRange = PaceRange
   { name      :: String
-  , minPace   :: Integer -- sec per k
-  , maxPace   :: Integer -- sec per k
+  , minPace   :: Int -- sec per k
+  , maxPace   :: Int -- sec per k
   , intensity :: String
   } deriving (Show, Eq)
 
-type Pace = (Integer, Integer)
+type Pace = (Int, Int)
 
 calculatePaces :: VDOT -> [PaceRange]
 calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
@@ -41,7 +41,7 @@ calculateZonePace vdot zone =
                   (paceAtDistance vdot 50000)
                   "30k intensity"
 
-paceAtDistance :: VDOT -> Double -> Integer
+paceAtDistance :: VDOT -> Double -> Int
 paceAtDistance vdot d = fst $ pacePerKm (equivalentTime vdot (CustomDistance d)) (CustomDistance d)
 
 pacePerKm :: RaceTime -> RaceDistance -> Pace

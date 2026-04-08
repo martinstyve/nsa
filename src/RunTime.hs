@@ -6,11 +6,11 @@ data RunTime
   | HMS Int Int Int -- h:mm:ss
   deriving (Show, Eq)
 
-runTimeToSec :: RunTime -> Integer
-runTimeToSec (MS m s)    = fromIntegral (m * 60 + s)
-runTimeToSec (HMS h m s) = fromIntegral (h * 3600 + m * 60 + s)
+runTimeToSec :: RunTime -> Int
+runTimeToSec (MS m s)    = m * 60 + s
+runTimeToSec (HMS h m s) = h * 3600 + m * 60 + s
 
-formatRunTime :: Integer -> Text
+formatRunTime :: Int -> Text
 formatRunTime totalSeconds = pack $
   if hours > 0
     then show hours ++ ":" ++ zeroPad mins ++ ":" ++ zeroPad secs
