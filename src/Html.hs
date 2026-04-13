@@ -22,10 +22,11 @@ indexMaybeError maybeError = do
   html_ do
     head_ do
       title_ "VDOT Calculator"
-      style_ "body { font-family: Arial, sans-serif; background: #f2f6fb; color: #1f2937; margin: 0; padding: 32px 16px; } .card { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 24px; } h1 { margin-top: 0; } p { margin: 0 0 14px 0; } label { display: block; font-weight: 600; margin-bottom: 6px; } input, select, button { font-size: 1rem; } input, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; } button { margin-top: 8px; background: #2563eb; color: white; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; } button:hover { background: #1d4ed8; } .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; padding: 10px; }"
+      style_ "body { font-family: Arial, sans-serif; background: #f2f6fb; color: #1f2937; margin: 0; padding: 32px 16px; } .card { max-width: 700px; margin: 0 auto 16px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); padding: 24px; } h1, h2 { margin-top: 0; } p { margin: 0 0 14px 0; } ul { margin: 0 0 14px 20px; padding: 0; } li { margin-bottom: 6px; } label { display: block; font-weight: 600; margin-bottom: 6px; } input, select, button { font-size: 1rem; } input, select { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; } button { margin-top: 8px; background: #2563eb; color: white; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; } button:hover { background: #1d4ed8; } .error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; padding: 10px; } a { color: #2563eb; text-decoration: none; font-weight: 600; } a:hover { text-decoration: underline; }"
     body_ do
       div_ [class_ "card"] do
-        h1_ "My calc"
+        h1_ "Norwegian Singles Calculator"
+        p_ "Calculate optimal training paces using the Norwegian Singles method"
         maybe mempty (p_ [class_ "error"] . toHtml) maybeError
         form_ [action_ "/result", method_ "get"] do
           p_ do
@@ -38,8 +39,21 @@ indexMaybeError maybeError = do
               option_ [value_ "10k"] "10km"
               option_ [value_ "half"] "Half Marathon"
               option_ [value_ "marathon"] "Marathon"
-          button_ [type_ "submit"] "find vdot"
-
+          button_ [type_ "submit"] "Analyze"
+      div_ [class_ "card"] do
+        h2_ "About Norwegian Singles"
+        p_ "The Norwegian Singles method is a training approach that emphasizes sub-threshold training to maximize adaptations while minimizing fatigue."
+        p_ "Key principles:"
+        ul_ do
+          li_ "2-3 quality sessions per week plus 1 long run"
+          li_ "Quality work comprises 20-25% of weekly running time"
+          li_ "Maintain sub-threshold state (2.5-3.5 mmol/L lactate)"
+          li_ "Keep easy runs extremely easy (hardmax 70% of max heart rate)"
+        p_ "This calculator helps you determine appropriate paces for interval sessions based on your current fitness level, measured through VDOT, Critical Speed, or Critical Power."
+        p_ do
+          "Learn more from the "
+          a_ [href_ "https://www.reddit.com/r/NorwegianSinglesRun/wiki/index/", target_ "_blank"] "Reddit"
+          " Wiki."
 
 -- todo ?
 -- RaceTime :: Text
