@@ -8,6 +8,6 @@ to run locally:
 >
 > `cabal run`
 
-runs on [http://localhost:3000](http://localhost:3000)
+runs on [http://localhost:6767](http://localhost:6767)
 
 note to self: school relevant document in `docs`, listed in `.gitignore`
