@@ -11,9 +11,13 @@ main = do
       quickCheck testParseTimeInvalidSeconds
 
 testRunTimeToSec :: Property
-testRunTimeToSec =
-      runTimeToSec (HMS 1 2 3) === 3723
+testRunTimeToSec = conjoin
+      [ runTimeToSec (HMS 1 2 3) === 3723 
+      , runTimeToSec ( HMS 0 60 0) === 3600
+      ]
 
 testParseTimeInvalidSeconds :: Property
-testParseTimeInvalidSeconds =
-      parseTime (pack "5:61") === Left InvalidSeconds
+testParseTimeInvalidSeconds = conjoin
+      [ parseTime (pack "5:61") === Left InvalidSeconds
+      -- , parseTime (pack "5:-1") === Left InvalidFormat -- is negative numbers InvalidSeconds or InvalidFormat..?
+      ]
