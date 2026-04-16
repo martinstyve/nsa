@@ -20,8 +20,6 @@ import           VDOT
 
 newtype TimeParam = TimeParam RT.RunTime
 
-newtype DistanceParam = DistanceParam RaceDistance
-
 -- https://hackage-content.haskell.org/package/http-api-data-0.7/docs/Web-HttpApiData.html
 -- parse "string" in url to a TimeParam
 instance FromHttpApiData TimeParam where
@@ -31,20 +29,13 @@ instance FromHttpApiData TimeParam where
       Left err      -> Left (P.inputErrorText err)
       Right runTime -> Right (TimeParam runTime)
 
-instance FromHttpApiData DistanceParam where
-  parseUrlPiece :: Text -> Either Text DistanceParam
-  parseUrlPiece piece =
-    case P.parseDistance piece of
-      Left err           -> Left (P.inputErrorText err)
-      Right raceDistance -> Right (DistanceParam raceDistance)
-
 -- servant docs tutorial and source code
 -- https://docs.servant.dev/en/latest/tutorial/
 -- https://github.com/haskell-servant/
 -- https://docs.servant.dev/en/latest/tutorial/ApiType.html 06.03.26
 type API
   = Get '[ HTML] (Html ())
-  :<|> "result" :> QueryParam "time" TimeParam :> QueryParam "dist" DistanceParam
+  :<|> "result" :> QueryParam "time" TimeParam :> QueryParam "dist" Text :> QueryParam "customDist" Text
   :> Get '[ HTML] (Html ())
 
 api :: Proxy API
@@ -54,18 +45,19 @@ server :: Server API
 server = homeHandler :<|> calcHandler
   where
     homeHandler = return Html.index
-    calcHandler (Just (TimeParam runTime)) (Just (DistanceParam raceDistance)) = do
-      let totalSeconds = fromIntegral $ RT.runTimeToSec runTime -- todo toSec be double or ...
-      let vdot = calculateVDOT totalSeconds raceDistance -- force calculateVDOT to be integer, trouble bisect function?
-      let raceTable =
-            [ ("5k", RT.formatRunTime (equivalentTime vdot FiveK))
-            , ("10k", RT.formatRunTime (equivalentTime vdot TenK))
-            , ("half", RT.formatRunTime (equivalentTime vdot HalfMarathon))
-            , ("marathon", RT.formatRunTime (equivalentTime vdot Marathon))
-            ]
-      let intervalPaces = calculatePaces vdot
-      return $ Html.resultPage vdot raceTable intervalPaces
-    calcHandler _ _ = return Html.index -- fallback
+    calcHandler (Just (TimeParam runTime)) (Just distChoice) maybeCustomDist =
+      case P.resolveDistanceSelection distChoice maybeCustomDist of
+        Left err -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
+        Right raceDistance -> do
+          let totalSeconds = fromIntegral $ RT.runTimeToSec runTime -- todo toSec be double or ...
+          let vdot = calculateVDOT totalSeconds raceDistance -- force calculateVDOT to be integer, trouble bisect function?
+          let raceTable =
+                [ (presetLabel preset, RT.formatRunTime (equivalentTime vdot (presetDistance preset)))
+                | preset <- presetRaceDistances ]
+          let intervalPaces = calculatePaces vdot
+          return $ Html.resultPage vdot raceTable intervalPaces
+
+    calcHandler _ _ _ = return Html.index -- fallback
 
 app :: Application
 app = serve api server

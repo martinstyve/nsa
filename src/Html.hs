@@ -33,12 +33,14 @@ indexMaybeError maybeError = do
             label_ "Time"
             input_ [type_ "text", name_ "time", placeholder_ "18:30"]
           p_ do
-            label_ "Distance"
+            label_ "Race distance"
             select_ [name_ "dist"] do
-              option_ [value_ "5k"] "5km"
-              option_ [value_ "10k"] "10km"
-              option_ [value_ "half"] "Half Marathon"
-              option_ [value_ "marathon"] "Marathon"
+              mapM_ (\preset -> option_ [value_ (presetValue preset)] (toHtml (presetLabel preset))) presetRaceDistances
+              option_ [value_ "custom"] "Custom distance"
+          p_ do
+            label_ "Custom distance (meters)"
+            input_ [type_ "number", name_ "customDist", min_ "1", max_ "50000", placeholder_ "8500"]
+          div_ "only used when Custom distance is selected from dropdown"
           button_ [type_ "submit"] "Analyze"
       div_ [class_ "card"] do
         h2_ "About Norwegian Singles"

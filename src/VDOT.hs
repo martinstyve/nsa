@@ -1,4 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module VDOT where
+
+import           Data.Text (Text)
 
 -- vdot formula:
 -- | module comment
@@ -6,20 +10,46 @@ module VDOT where
 -- thanks to Larry Simpson for providing [formula](http://www.simpsonassociatesinc.com/runningmath1.htm)
 -- and Daniels/Gilbert for formula
 data RaceDistance
-  = FiveK
+  = FifteenHundred
+  | OneMile
+  | ThreeK
+  | FiveK
   | TenK
+  | TenMile
   | HalfMarathon
   | Marathon
   | CustomDistance Double
   deriving (Show, Eq)
+
+data RaceDistancePreset = RaceDistancePreset
+  { presetValue    :: Text
+  , presetLabel    :: Text
+  , presetDistance :: RaceDistance
+  }
+
+presetRaceDistances :: [RaceDistancePreset]
+presetRaceDistances =
+  [ RaceDistancePreset "1500m" "1500 m" FifteenHundred
+  , RaceDistancePreset "mile" "1 mile" OneMile
+  , RaceDistancePreset "3000m" "3000 m" ThreeK
+  , RaceDistancePreset "5k" "5 km" FiveK
+  , RaceDistancePreset "10k" "10 km" TenK
+  , RaceDistancePreset "10mile" "10 mile" TenMile
+  , RaceDistancePreset "half" "Half marathon" HalfMarathon
+  , RaceDistancePreset "marathon" "Marathon" Marathon
+  ]
 
 type VDOT = Double
 
 type RaceTime = Int -- TODO: decide on Double or Integer. int most clean
 
 distanceNumerical :: RaceDistance -> Double
+distanceNumerical FifteenHundred     = 1500.0
+distanceNumerical OneMile            = 1609
+distanceNumerical ThreeK             = 3000.0
 distanceNumerical FiveK              = 5000.0
 distanceNumerical TenK               = 10000.0
+distanceNumerical TenMile            = 16093
 distanceNumerical Marathon           = 42195.0
 distanceNumerical HalfMarathon       = 21097.5
 distanceNumerical (CustomDistance n) = n
@@ -57,4 +87,5 @@ equivalentTime vdot distance
   -- range now 1 second to 24 hours
   -- expected use for calculator is 1500 to marathon. Should it be hard limit
   -- on 1500 WR to normal marathon cut-off time?
+  -- update TODO: set hard limit WR 800m to WR marathon
  = round $ bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
