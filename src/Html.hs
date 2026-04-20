@@ -31,7 +31,7 @@ indexMaybeError maybeError = do
         form_ [action_ "/result", method_ "get"] do
           p_ do
             label_ "Time"
-            input_ [type_ "text", name_ "time", placeholder_ "18:30"]
+            input_ [type_ "text", name_ "time", placeholder_ "5:30"]
           p_ do
             label_ "Race distance"
             select_ [name_ "dist"] do
