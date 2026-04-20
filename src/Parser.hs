@@ -55,7 +55,7 @@ distanceParser = choice
 customDistanceParser :: Parser Int
 customDistanceParser = do
   meters <- digits
-  if 0 < meters && meters <= 50000 -- not sure if here is place to set max limit
+  if 0 < meters && meters <= 50000 -- max distance 50km
     then pure meters
     else customFailure InvalidCustomDistance
 
