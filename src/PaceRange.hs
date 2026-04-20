@@ -28,10 +28,7 @@ pacePerKm time distance
     meters = distanceNumerical distance
 
 paceAtDistance :: VDOT -> Double -> Int
-paceAtDistance vdot d =
-  let dist = CustomDistance d
-      time = equivalentTime vdot dist
-   in pacePerKm time dist
+paceAtDistance vdot d = pacePerKm (equivalentTime vdot (CustomDistance d)) (CustomDistance d)
 
 calculatePaces :: VDOT -> [PaceRange]
 calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
