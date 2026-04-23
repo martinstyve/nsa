@@ -42,22 +42,34 @@ api :: Proxy API
 api = Proxy
 
 server :: Server API
-server = homeHandler :<|> calcHandler
-  where
-    homeHandler = return Html.index
-    calcHandler (Just (TimeParam runTime)) (Just distChoice) maybeCustomDist =
-      case P.resolveDistanceSelection distChoice maybeCustomDist of
-        Left err -> return $ Html.indexMaybeError (Just (P.inputErrorText err))
-        Right raceDistance -> do
-          let totalSeconds = fromIntegral $ RT.runTimeToSec runTime -- todo toSec be double or ...
-          let vdot = calculateVDOT totalSeconds raceDistance -- force calculateVDOT to be integer, trouble bisect function?
-          let raceTable =
-                [ (presetLabel preset, RT.formatRunTime (equivalentTime vdot (presetDistance preset)))
-                | preset <- presetRaceDistances ]
-          let intervalPaces = calculatePaces vdot
-          return $ Html.resultPage vdot raceTable intervalPaces
+server = homeHandler :<|> resultHandler
 
-    calcHandler _ _ _ = return Html.index -- fallback
+homeHandler :: Handler (Html ())
+homeHandler = return Html.index
+
+resultHandler :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Handler (Html ())
+resultHandler maybeTime maybeDist maybeCustomDist =
+  case validateParams maybeTime maybeDist maybeCustomDist of
+    Left maybeError  -> return (Html.indexMaybeError maybeError)
+    Right (runTime, raceDistance) -> return (buildResultPage runTime raceDistance)
+
+validateParams :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Either (Maybe Text) (RT.RunTime, RaceDistance)
+validateParams (Just (TimeParam runTime)) (Just distChoice) maybeCustomDist =
+  case P.resolveDistanceSelection distChoice maybeCustomDist of
+    Left err -> Left (Just (P.inputErrorText err))
+    Right raceDistance -> Right (runTime, raceDistance)
+validateParams _ _ _ = Left Nothing
+
+buildResultPage :: RT.RunTime -> RaceDistance -> Html ()
+buildResultPage runTime raceDistance =
+  Html.resultPage vdot raceTable intervalPaces
+  where
+    totalSeconds = fromIntegral (RT.runTimeToSec runTime)
+    vdot = calculateVDOT totalSeconds raceDistance
+    raceTable =
+      [ (presetLabel preset, RT.formatRunTime (equivalentTime vdot (presetDistance preset)))
+      | preset <- presetRaceDistances ]
+    intervalPaces = calculatePaces vdot
 
 app :: Application
 app = serve api server
