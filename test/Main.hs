@@ -3,6 +3,7 @@ module Main where
 import           Data.Text             (pack)
 import           Parser
 import           RunTime
+import           RaceDistance
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.QuickCheck as QC

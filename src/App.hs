@@ -15,6 +15,7 @@ import           Servant.HTML.Lucid
 import           Html
 import           PaceRange
 import           Parser                   as P
+import           RaceDistance
 import           RunTime                  as RT
 import           VDOT
 

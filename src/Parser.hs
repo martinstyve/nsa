@@ -9,7 +9,7 @@ import           Text.Megaparsec
 import           Text.Megaparsec.Char
 
 import           RunTime
-import           VDOT
+import           RaceDistance
 
 data InputError
   = InvalidSeconds

@@ -1,5 +1,6 @@
 module PaceRange where
 
+import           RaceDistance
 import           VDOT
 
 data Zone

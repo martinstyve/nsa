@@ -6,7 +6,8 @@ module Html where
 import           Data.Text (Text)
 import           Lucid
 import           PaceRange
-import qualified RunTime as RT
+import           RaceDistance
+import           RunTime as RT
 import           VDOT
 import Text.Printf
 
