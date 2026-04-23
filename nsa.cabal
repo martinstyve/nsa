@@ -33,6 +33,7 @@ library
     import: warnings
     hs-source-dirs: src
     exposed-modules: VDOT
+                   , RaceDistance
                    , PaceRange
                    , App
                    , Html
