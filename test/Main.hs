@@ -37,27 +37,29 @@ parserTests = testGroup "Parser"
 -- first unit tests then property
 paceRangeTests :: TestTree
 paceRangeTests = testGroup "PaceRange"
-  [ testGroup "toPace"
     [ testCase "0 seconds -> 0:00" $ toPace 0 @?= (0, 0)
     , testCase "59 seconds -> 0:59" $ toPace 59 @?= (0, 59)
     , testCase "60 seconds -> 1:00" $ toPace 60 @?= (1, 0)
-    , testCase "3599 seconds -> 59:59" $ toPace 3599 @?= (59, 59) ]
-  , QC.testProperty "toPace preserves total seconds" prop_toPace_inversion
-  , QC.testProperty "toPace always returns seconds in [0, 59]" prop_toPace_valid_seconds
-  , QC.testProperty "calculatePaces returns correct number of zones" prop_calculatePaces_count
-  , QC.testProperty "calculatePaces minPace <= maxPace" prop_calculatePaces_ordered
+    , testCase "3599 seconds -> 59:59" $ toPace 3599 @?= (59, 59)
+    , QC.testProperty "toPace preserves total seconds" prop_toPace_inversion
+    , QC.testProperty "toPace always returns seconds in [0, 59]" prop_toPace_valid_seconds
+    , QC.testProperty "calculatePaces returns correct number of zones" prop_calculatePaces_count
+    , QC.testProperty "calculatePaces minPace <= maxPace" prop_calculatePaces_ordered
   ]
 
 -- first unit tests then property todo: unit
 runTimeTests :: TestTree
 runTimeTests = testGroup "RunTime"
-  [ QC.testProperty "seconds to runtime inversion confirmation" prop_secondsToRunTime_Inversion
+  [ testCase "formatRunTime formats sub one minute" $ formatRunTime 59 @?= pack "0:59"
+  , testCase "formatRunTime formats one hour" $ formatRunTime 3600 @?= pack "1:00:00"
+  , QC.testProperty "seconds to runtime inversion confirmation" prop_secondsToRunTime_Inversion
   , QC.testProperty "formatRunTime . runTimeToSec round-trip" prop_formatRunTimeRoundTrip_composition
   ]
 
 vdotTests :: TestTree
 vdotTests = testGroup "VDOT"
-  [ testCase "equivalentTime vdot inversion at 5k" $
+  [ testCase "distanceNumerical custom distance works" $ distanceNumerical (CustomDistance 6767.6) @?= 6767.6
+  , testCase "equivalentTime vdot inversion at 5k" $
       let time = equivalentTime 67 FiveK -- 67 is VDOT number
           calculatedVdot = calculateVDOT (fromIntegral time) FiveK
       in abs (calculatedVdot - 67) < 0.1 @?= True -- epsilon needed
