@@ -1,9 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-| Module      : RaceDistance
+Description : Represent and convert common race distances
+
+Provides standard running race distances from 1500m to marathon,
+with preset labels for UI display and conversion to meters
+-}
 module RaceDistance where
 
 import           Data.Text (Text)
 
+-- | Standard race distances
+--
+-- Common track and road race distances, with a CustomDistance constructor
+-- for distances in meters
 data RaceDistance
   = FifteenHundred
   | OneMile
@@ -13,15 +23,23 @@ data RaceDistance
   | TenMile
   | HalfMarathon
   | Marathon
-  | CustomDistance Double
+  | CustomDistance Double -- in meters
   deriving (Show, Eq)
 
+-- | UI preset for a race distance
+--
+-- Fields:
+--
+-- * @presetValue@ - For computer to read
+-- * @presetLabel@ - For humans to read
+-- * @presetDistance@ - Actual data type
 data RaceDistancePreset = RaceDistancePreset
   { presetValue    :: Text
   , presetLabel    :: Text
   , presetDistance :: RaceDistance
   }
 
+-- | List of standard race distance presets
 presetRaceDistances :: [RaceDistancePreset]
 presetRaceDistances =
   [ RaceDistancePreset "1500m" "1500 m" FifteenHundred
@@ -34,6 +52,7 @@ presetRaceDistances =
   , RaceDistancePreset "marathon" "Marathon" Marathon
   ]
 
+-- | Convert race distance to meters
 distanceNumerical :: RaceDistance -> Double
 distanceNumerical FifteenHundred     = 1500.0
 distanceNumerical OneMile            = 1609
