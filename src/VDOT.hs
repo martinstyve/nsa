@@ -17,7 +17,7 @@ type VDOT = Double
 --
 -- Parameters: @time@ in seconds, @distance@ as RaceDistance
 --
--- Formula: @VO2 cost = 0.182258 * v + 0.000104 * v² - 4.60@
+-- Formula: @VO2 cost = 0.182258 * v + 0.000104 * v^2 - 4.60@
 -- where @v@ is velocity (m/min), adjusted by duration factor
 calculateVDOT :: Double -> RaceDistance -> VDOT
 calculateVDOT time distance = o2cost / dropDead
