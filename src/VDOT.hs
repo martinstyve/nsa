@@ -1,19 +1,24 @@
+{-| Module      : VDOT
+Description : Calculate VDOT (VO2 max) from race times and predict equivalent performances
+
+VDOT represents aerobic fitness as maximum oxygen utilization (ml/kg/min)
+It is calculated from race performance and can predict times for other distances
+
+Formulas based on Jack Daniels' running research via [Larry Simpson's implementation](http://www.simpsonassociatesinc.com/runningmath1.htm)
+-}
 module VDOT where
 
--- vdot formula:
--- | module comment
---
--- thanks to Larry Simpson for providing [formula](http://www.simpsonassociatesinc.com/runningmath1.htm)
--- and Daniels/Gilbert for formula
 import           RaceDistance
 
+-- | VO2 max equivalent value in ml/kg/minute
 type VDOT = Double
 
--- | formula found through link at top of module
--- oxygen cost formula on page 2
--- drop dead formula on page 3
--- "max intensity" divided by "duration human can run at intensity"
--- velocity v is expressed as meters per minute
+-- | Calculate VDOT from a race time and distance
+--
+-- Parameters: @time@ in seconds, @distance@ as RaceDistance
+--
+-- Formula: @VO2 cost = 0.182258 * v + 0.000104 * v² - 4.60@
+-- where @v@ is velocity (m/min), adjusted by duration factor
 calculateVDOT :: Double -> RaceDistance -> VDOT
 calculateVDOT time distance = o2cost / dropDead
   where
@@ -25,7 +30,9 @@ calculateVDOT time distance = o2cost / dropDead
         + 0.1894393 * exp (-(0.012778 * t))
         + 0.8
 
--- todo generic num
+-- | Binary search to find where a function reaches a target value
+-- Converges until interval is less than 0.01 wide
+-- Parameters: @f@ (function), @target@ (goal value), @low@ and @high@ bounds
 bisect :: (Double -> Double) -> Double -> Double -> Double -> Double
 bisect f target low high
   | (high - low) < 0.01 = mid
@@ -34,13 +41,12 @@ bisect f target low high
   where
     mid = (low + high) / 2
 
--- | calculate other times from a given VDOT, but we dont have a formula or table
--- to look up what is equivalent, so need to search through vdots until we get
--- a distance+time which gives an equal vdot (0.01 margin)
+-- | Predict race time for a given VDOT and distance
+--
+-- Given VDOT and target distance, computes time in sec
+-- Uses 'bisect' to invert 'calculateVDOT' since no closed-form inverse exists
+-- Search range: 1 second to 24 hours
 equivalentTime :: VDOT -> RaceDistance -> Int
 equivalentTime vdot distance
-  -- range now 1 second to 24 hours
-  -- expected use for calculator is 1500 to marathon. Should it be hard limit
-  -- on 1500 WR to normal marathon cut-off time?
-  -- update TODO: set hard limit WR 800m to WR marathon
+  -- TODO: set hard limit WR 800m to WR marathon?
  = round $ bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
