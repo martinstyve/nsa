@@ -31,17 +31,27 @@ appErrorText (VdotCalculationError err) = Just (vdotErrorText err)
 
 newtype TimeParam = TimeParam Text
 
+-- https://hackage-content.haskell.org/package/http-api-data-0.7/docs/Web-HttpApiData.html
 instance FromHttpApiData TimeParam where
   parseUrlPiece :: Text -> Either Text TimeParam
   parseUrlPiece = Right . TimeParam
 
--- servant docs tutorial and source code
--- https://docs.servant.dev/en/latest/tutorial/
--- https://github.com/haskell-servant/
--- https://docs.servant.dev/en/latest/tutorial/ApiType.html 06.03.26
+newtype DistanceParam = DistanceParam Text
+
+instance FromHttpApiData DistanceParam where
+  parseUrlPiece :: Text -> Either Text DistanceParam
+  parseUrlPiece = Right . DistanceParam
+
+newtype CustomDistanceParam = CustomDistanceParam Text
+
+instance FromHttpApiData CustomDistanceParam where
+  parseUrlPiece :: Text -> Either Text CustomDistanceParam
+  parseUrlPiece = Right . CustomDistanceParam
+
+-- https://docs.servant.dev/en/latest/tutorial/ApiType.html
 type API
   = Get '[ HTML] (Html ())
-  :<|> "result" :> QueryParam "time" TimeParam :> QueryParam "dist" Text :> QueryParam "customDist" Text
+  :<|> "result" :> QueryParam "time" TimeParam :> QueryParam "dist" DistanceParam :> QueryParam "customDist" CustomDistanceParam
   :> Get '[ HTML] (Html ())
 
 api :: Proxy API
@@ -53,7 +63,7 @@ server = homeHandler :<|> resultHandler
 homeHandler :: Handler (Html ())
 homeHandler = return Html.index
 
-resultHandler :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Handler (Html ())
+resultHandler :: Maybe TimeParam -> Maybe DistanceParam -> Maybe CustomDistanceParam -> Handler (Html ())
 resultHandler maybeTime maybeDist maybeCustomDist =
   case validateParams maybeTime maybeDist maybeCustomDist of
     Left err -> return (Html.indexMaybeError (appErrorText err))
@@ -62,15 +72,18 @@ resultHandler maybeTime maybeDist maybeCustomDist =
         Left err -> return (Html.indexMaybeError (appErrorText err))
         Right page -> return page
 
-validateParams :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Either AppError (RT.RunTime, RaceDistance)
-validateParams (Just (TimeParam timeText)) (Just distChoice) maybeCustomDist =
+validateParams :: Maybe TimeParam -> Maybe DistanceParam -> Maybe CustomDistanceParam -> Either AppError (RT.RunTime, RaceDistance)
+validateParams (Just (TimeParam timeText)) (Just (DistanceParam distChoice)) maybeCustomDist =
   case P.parseTime timeText of
     Left err -> Left (InputParseError err)
     Right runTime ->
-      case P.resolveDistanceSelection distChoice maybeCustomDist of
+      case P.resolveDistanceSelection distChoice (unwrapCustomDist <$> maybeCustomDist) of
         Left err -> Left (InputParseError err)
         Right raceDistance -> Right (runTime, raceDistance)
 validateParams _ _ _ = Left MissingRequiredInput
+
+unwrapCustomDist :: CustomDistanceParam -> Text
+unwrapCustomDist (CustomDistanceParam customDistText) = customDistText
 
 buildResultPage :: RT.RunTime -> RaceDistance -> Either AppError (Html ())
 buildResultPage runTime raceDistance =
