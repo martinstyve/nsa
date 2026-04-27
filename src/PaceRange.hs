@@ -29,7 +29,9 @@ pacePerKm time distance
     meters = distanceNumerical distance
 
 paceAtDistance :: VDOT -> Double -> Int
-paceAtDistance vdot d = pacePerKm (equivalentTime vdot (CustomDistance d)) (CustomDistance d)
+paceAtDistance vdot d = either (const 0) paceCalc (equivalentTime vdot (CustomDistance d))
+  where
+    paceCalc time = pacePerKm time (CustomDistance d)
 
 calculatePaces :: VDOT -> [PaceRange]
 calculatePaces vdot = map (calculateZonePace vdot) [minBound .. maxBound]
