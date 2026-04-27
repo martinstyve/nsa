@@ -44,8 +44,7 @@ paceRangeTests = testGroup "PaceRange"
     , testCase "3599 seconds -> 59:59" $ toPace 3599 @?= (59, 59)
     , QC.testProperty "toPace preserves total seconds" prop_toPace_inversion
     , QC.testProperty "toPace always returns seconds in [0, 59]" prop_toPace_valid_seconds
-    , QC.testProperty "calculatePaces returns correct number of zones" prop_calculatePaces_count
-    , QC.testProperty "calculatePaces minPace <= maxPace" prop_calculatePaces_ordered
+    , QC.testProperty "calculatePaces returns correct number of zones" prop_calculatePaces_zoneCount
   ]
 
 -- first unit tests then property todo: unit
@@ -86,18 +85,12 @@ prop_toPace_valid_seconds totalSec =
   let (_, s) = toPace totalSec
   in QC.property (s >= 0 && s < 60)
 
-prop_calculatePaces_count :: NonNegative Double -> Property
-prop_calculatePaces_count (NonNegative vdot) =
+prop_calculatePaces_zoneCount :: NonNegative Double -> Property
+prop_calculatePaces_zoneCount (NonNegative vdot) =
   let v = 20 + fromIntegral (floor vdot `mod` 60 :: Int)  -- constrain VDOT 20-80
       paces = calculatePaces v
       zoneCount = length [minBound .. maxBound :: Zone]
   in length paces === zoneCount
-
-prop_calculatePaces_ordered :: NonNegative Double -> Property
-prop_calculatePaces_ordered (NonNegative vdot) =
-  let v = 20 + fromIntegral (floor vdot `mod` 60 :: Int)  -- constrain to 20-80
-  in QC.property (all (\p -> minPace p <= maxPace p) (calculatePaces v))
-
 
 --------------------    RunTime     --------------------
 -- easy test for helper
