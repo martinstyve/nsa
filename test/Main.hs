@@ -61,9 +61,11 @@ vdotTests :: TestTree
 vdotTests = testGroup "VDOT"
   [ testCase "distanceNumerical custom distance works" $ distanceNumerical (CustomDistance 6767.6) @?= 6767.6
   , testCase "equivalentTime vdot inversion at 5k" $
-      let time = equivalentTime 67 FiveK -- 67 is VDOT number
-          calculatedVdot = calculateVDOT (fromIntegral time) FiveK
-      in abs (calculatedVdot - 67) < 0.1 @?= True -- epsilon needed
+      case equivalentTime 67 FiveK of
+        Left err -> assertFailure $ "expected Right value. got: " ++ show err
+        Right time ->
+          let calculatedVdot = calculateVDOT (fromIntegral time) FiveK
+          in abs (calculatedVdot - 67) < 0.1 @?= True -- epsilon needed
   ]
 
 
