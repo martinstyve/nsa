@@ -19,16 +19,21 @@ import           RaceDistance
 import           RunTime                  as RT
 import           VDOT
 
-newtype TimeParam = TimeParam RT.RunTime
+data AppError
+  = MissingRequiredInput
+  | InputParseError InputError
+  | VdotCalculationError VDOTError
 
--- https://hackage-content.haskell.org/package/http-api-data-0.7/docs/Web-HttpApiData.html
--- parse "string" in url to a TimeParam
+appErrorText :: AppError -> Maybe Text
+appErrorText MissingRequiredInput = Nothing
+appErrorText (InputParseError err) = Just (P.inputErrorText err)
+appErrorText (VdotCalculationError err) = Just (vdotErrorText err)
+
+newtype TimeParam = TimeParam Text
+
 instance FromHttpApiData TimeParam where
   parseUrlPiece :: Text -> Either Text TimeParam
-  parseUrlPiece piece =
-    case P.parseTime piece of
-      Left err      -> Left (P.inputErrorText err)
-      Right runTime -> Right (TimeParam runTime)
+  parseUrlPiece = Right . TimeParam
 
 -- servant docs tutorial and source code
 -- https://docs.servant.dev/en/latest/tutorial/
@@ -51,24 +56,34 @@ homeHandler = return Html.index
 resultHandler :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Handler (Html ())
 resultHandler maybeTime maybeDist maybeCustomDist =
   case validateParams maybeTime maybeDist maybeCustomDist of
-    Left maybeError  -> return (Html.indexMaybeError maybeError)
-    Right (runTime, raceDistance) -> return (buildResultPage runTime raceDistance)
+    Left err -> return (Html.indexMaybeError (appErrorText err))
+    Right (runTime, raceDistance) ->
+      case buildResultPage runTime raceDistance of
+        Left err -> return (Html.indexMaybeError (appErrorText err))
+        Right page -> return page
 
-validateParams :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Either (Maybe Text) (RT.RunTime, RaceDistance)
-validateParams (Just (TimeParam runTime)) (Just distChoice) maybeCustomDist =
-  case P.resolveDistanceSelection distChoice maybeCustomDist of
-    Left err -> Left (Just (P.inputErrorText err))
-    Right raceDistance -> Right (runTime, raceDistance)
-validateParams _ _ _ = Left Nothing
+validateParams :: Maybe TimeParam -> Maybe Text -> Maybe Text -> Either AppError (RT.RunTime, RaceDistance)
+validateParams (Just (TimeParam timeText)) (Just distChoice) maybeCustomDist =
+  case P.parseTime timeText of
+    Left err -> Left (InputParseError err)
+    Right runTime ->
+      case P.resolveDistanceSelection distChoice maybeCustomDist of
+        Left err -> Left (InputParseError err)
+        Right raceDistance -> Right (runTime, raceDistance)
+validateParams _ _ _ = Left MissingRequiredInput
 
-buildResultPage :: RT.RunTime -> RaceDistance -> Html ()
+buildResultPage :: RT.RunTime -> RaceDistance -> Either AppError (Html ())
 buildResultPage runTime raceDistance =
-  Html.resultPage vdot raceTable intervalPaces
+  case raceTableOrError of
+    Left err -> Left (VdotCalculationError err)
+    Right raceTable -> Right (Html.resultPage vdot raceTable intervalPaces)
   where
     totalSeconds = fromIntegral (RT.runTimeToSec runTime)
     vdot = calculateVDOT totalSeconds raceDistance
-    raceTable =
-      [ (presetLabel preset, RT.formatRunTime (equivalentTime vdot (presetDistance preset)))
+    raceTableOrError = sequence
+      [ case equivalentTime vdot (presetDistance preset) of
+          Left err -> Left err
+          Right time -> Right (presetLabel preset, RT.formatRunTime time)
       | preset <- presetRaceDistances ]
     intervalPaces = calculatePaces vdot
 

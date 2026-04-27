@@ -8,10 +8,21 @@ Formulas based on Jack Daniels' running research via [Larry Simpson's implementa
 -}
 module VDOT where
 
+import           Data.Text (Text, pack)
 import           RaceDistance
 
 -- | VO2 max equivalent value in ml/kg/minute
 type VDOT = Double
+
+-- | VDOT calculation errors
+data VDOTError
+  = TimeOutOfRange
+  deriving (Show, Eq, Ord)
+
+-- | Convert VDOT error to user-friendly text
+vdotErrorText :: VDOTError -> Text
+vdotErrorText TimeOutOfRange =
+  pack "Predicted time is outside the range of this calculator (VDOT equivalent of 3:20 1500m or slower than 7 hour marathon)"
 
 -- | Calculate VDOT from a race time and distance
 --
@@ -45,8 +56,16 @@ bisect f target low high
 --
 -- Given VDOT and target distance, computes time in sec
 -- Uses 'bisect' to invert 'calculateVDOT' since no closed-form inverse exists
--- Search range: 1 second to 24 hours
-equivalentTime :: VDOT -> RaceDistance -> Int
+-- Search range: VDOT equivalent of 00:03:20 1500m and 07:00:00 marathon
+--
+-- Returns an error if the result is outside the valid range
+equivalentTime :: VDOT -> RaceDistance -> Either VDOTError Int
 equivalentTime vdot distance
-  -- TODO: set hard limit WR 800m to WR marathon?
- = round $ bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
+  | roundedTime < minLimit = Left TimeOutOfRange
+  | roundedTime > maxLimit = Left TimeOutOfRange
+  | otherwise              = Right roundedTime
+  where
+    calculatedTime = bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
+    roundedTime    = round calculatedTime
+    minLimit = 200        -- 00:03:20
+    maxLimit = 25200      -- 07:00:00
