@@ -25,24 +25,27 @@ data AppError
   | VdotCalculationError VDOTError
 
 appErrorText :: AppError -> Maybe Text
-appErrorText MissingRequiredInput = Nothing
-appErrorText (InputParseError err) = Just (P.inputErrorText err)
+appErrorText MissingRequiredInput       = Nothing
+appErrorText (InputParseError err)      = Just (P.inputErrorText err)
 appErrorText (VdotCalculationError err) = Just (vdotErrorText err)
 
-newtype TimeParam = TimeParam Text
+newtype TimeParam =
+  TimeParam Text
 
 -- https://hackage-content.haskell.org/package/http-api-data-0.7/docs/Web-HttpApiData.html
 instance FromHttpApiData TimeParam where
   parseUrlPiece :: Text -> Either Text TimeParam
   parseUrlPiece = Right . TimeParam
 
-newtype DistanceParam = DistanceParam Text
+newtype DistanceParam =
+  DistanceParam Text
 
 instance FromHttpApiData DistanceParam where
   parseUrlPiece :: Text -> Either Text DistanceParam
   parseUrlPiece = Right . DistanceParam
 
-newtype CustomDistanceParam = CustomDistanceParam Text
+newtype CustomDistanceParam =
+  CustomDistanceParam Text
 
 instance FromHttpApiData CustomDistanceParam where
   parseUrlPiece :: Text -> Either Text CustomDistanceParam
@@ -50,9 +53,9 @@ instance FromHttpApiData CustomDistanceParam where
 
 -- https://docs.servant.dev/en/latest/tutorial/ApiType.html
 type API
-  = Get '[ HTML] (Html ())
-  :<|> "result" :> QueryParam "time" TimeParam :> QueryParam "dist" DistanceParam :> QueryParam "customDist" CustomDistanceParam
-  :> Get '[ HTML] (Html ())
+  = Get '[ HTML] (Html ()) :<|> "result" :> QueryParam "time" TimeParam :> QueryParam
+      "dist" DistanceParam :> QueryParam "customDist" CustomDistanceParam :> Get '[ HTML]
+      (Html ())
 
 api :: Proxy API
 api = Proxy
@@ -69,17 +72,17 @@ resultHandler maybeTime maybeDist maybeCustomDist =
     Left err -> return (Html.indexMaybeError (appErrorText err))
     Right (runTime, raceDistance) ->
       case buildResultPage runTime raceDistance of
-        Left err -> return (Html.indexMaybeError (appErrorText err))
+        Left err   -> return (Html.indexMaybeError (appErrorText err))
         Right page -> return page
 
 validateParams :: Maybe TimeParam -> Maybe DistanceParam -> Maybe CustomDistanceParam -> Either AppError (RT.RunTime, RaceDistance)
 validateParams (Just (TimeParam timeText)) (Just (DistanceParam distChoice)) maybeCustomDist =
   case P.parseTime timeText of
     Left err -> Left (InputParseError err)
-    Right runTime ->
-      case P.resolveDistanceSelection distChoice (unwrapCustomDist <$> maybeCustomDist) of
-        Left err -> Left (InputParseError err)
-        Right raceDistance -> Right (runTime, raceDistance)
+    Right runTime -> case P.resolveDistanceSelection
+        distChoice (unwrapCustomDist <$> maybeCustomDist) of
+          Left err           -> Left (InputParseError err)
+          Right raceDistance -> Right (runTime, raceDistance)
 validateParams _ _ _ = Left MissingRequiredInput
 
 unwrapCustomDist :: CustomDistanceParam -> Text
@@ -88,16 +91,16 @@ unwrapCustomDist (CustomDistanceParam customDistText) = customDistText
 buildResultPage :: RT.RunTime -> RaceDistance -> Either AppError (Html ())
 buildResultPage runTime raceDistance =
   case raceTableOrError of
-    Left err -> Left (VdotCalculationError err)
+    Left err        -> Left (VdotCalculationError err)
     Right raceTable -> Right (Html.resultPage vdot raceTable intervalPaces)
   where
     totalSeconds = fromIntegral (RT.runTimeToSec runTime)
     vdot = calculateVDOT totalSeconds raceDistance
-    raceTableOrError = sequence
-      [ case equivalentTime vdot (presetDistance preset) of
-          Left err -> Left err
+    raceTableOrError =
+      sequence [ case equivalentTime vdot (presetDistance preset) of
+          Left err   -> Left err
           Right time -> Right (presetLabel preset, RT.formatRunTime time)
-      | preset <- presetRaceDistances ]
+        | preset <- presetRaceDistances ]
     intervalPaces = calculatePaces vdot
 
 app :: Application
