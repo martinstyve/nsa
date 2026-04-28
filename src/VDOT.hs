@@ -65,7 +65,7 @@ equivalentTime vdot distance
   | roundedTime > maxLimit = Left TimeOutOfRange
   | otherwise              = Right roundedTime
   where
-    calculatedTime = bisect (`calculateVDOT` distance) vdot 1 (24 * 3600)
+    calculatedTime = bisect (`calculateVDOT` distance) vdot 199 25201
     roundedTime    = round calculatedTime
     minLimit = 200        -- 00:03:20
     maxLimit = 25200      -- 07:00:00
