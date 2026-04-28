@@ -72,10 +72,10 @@ resultPage vdot raceTable intervalPaces = do
       div_ [class_ "card"] do
         h1_ "result"
         p_ $ "VDOT: " >> toHtml (printf "%.1f" vdot :: String) -- display with 1 decimal
-        h2_ "equiv race times"
+        h2_ "Equivalent Race Performances"
         table_ do
           mapM_ (\(d, t) -> tr_ (td_ (toHtml d) >> td_ (toHtml t))) raceTable
-        h2_ "interval pace ranges"
+        h2_ "Interval Pace Ranges"
         table_ do
           tr_ do
             th_ "Zone"
