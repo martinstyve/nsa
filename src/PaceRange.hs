@@ -94,5 +94,5 @@ calculateZonePace vdot zone =
     LongRep -> PaceRange
         { name = "Long Intervals"
         , minPace = paceAtDistance vdot 30000
-        , maxPace = paceAtDistance vdot 42195
+        , maxPace = paceAtDistance vdot 42195 -- marathon
         , intensity = "30k intensity" }
