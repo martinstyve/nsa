@@ -2,7 +2,7 @@ module Main where
 
 import           Data.Text             (pack)
 import           Parser
-import           RunTime
+import           RunTime as RT
 import           RaceDistance
 import           Test.Tasty
 import           Test.Tasty.HUnit
@@ -50,8 +50,8 @@ paceRangeTests = testGroup "PaceRange"
 -- first unit tests then property todo: unit
 runTimeTests :: TestTree
 runTimeTests = testGroup "RunTime"
-  [ testCase "formatRunTime formats sub one minute" $ formatRunTime 59 @?= pack "0:59"
-  , testCase "formatRunTime formats one hour" $ formatRunTime 3600 @?= pack "1:00:00"
+  [ testCase "showRunTime formats sub one minute" $ RT.showRunTime (secToRunTime 59) @?= pack "0:59"
+  , testCase "showRunTime formats one hour" $ RT.showRunTime (secToRunTime 3600) @?= pack "1:00:00"
   , QC.testProperty "seconds to runtime inversion confirmation" prop_secondsToRunTime_Inversion
   , QC.testProperty "formatRunTime . runTimeToSec round-trip" prop_formatRunTimeRoundTrip_composition
   ]
@@ -71,7 +71,7 @@ vdotTests = testGroup "VDOT"
 --------------------    Parser      --------------------
 prop_formatRunTimeRoundTrip :: NonNegative Int -> Property
 prop_formatRunTimeRoundTrip (NonNegative totalSeconds) =
-  parseTime (formatRunTime totalSeconds) === Right (secondsToRunTime totalSeconds)
+  parseTime (RT.showRunTime (secToRunTime totalSeconds)) === Right (secToRunTime totalSeconds)
 
 
 --------------------   PaceRange    --------------------
@@ -97,20 +97,10 @@ prop_calculatePaces_zoneCount (NonNegative vdot) =
 -- totalsec -> runtime -> totalsec
 prop_secondsToRunTime_Inversion :: NonNegative Int -> Property
 prop_secondsToRunTime_Inversion (NonNegative totalSeconds) =
-  runTimeToSec (secondsToRunTime totalSeconds) === totalSeconds
+  runTimeToSec (secToRunTime totalSeconds) === totalSeconds
 
 prop_formatRunTimeRoundTrip_composition :: NonNegative Int -> Property
 prop_formatRunTimeRoundTrip_composition (NonNegative totalSeconds) =
-  let rt = secondsToRunTime totalSeconds
-      formatted = formatRunTime (runTimeToSec rt)
-  in formatted === formatRunTime totalSeconds
-
---------------------    helpers     --------------------
-secondsToRunTime :: Int -> RunTime
-secondsToRunTime totalSec
-  | totalSec < 3600 = MS m s
-  | otherwise = HMS h m s
-  where
-    h = totalSec `div` 3600
-    m = (totalSec `mod` 3600) `div` 60
-    s = totalSec `mod` 60
+  let rt = secToRunTime totalSeconds
+      formatted = RT.showRunTime rt
+  in formatted === RT.showRunTime (secToRunTime totalSeconds)
