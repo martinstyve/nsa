@@ -42,7 +42,9 @@ calculateVDOT time distance = o2cost / dropDead
         + 0.8
 
 -- | Binary search to find where a function reaches a target value
+--
 -- Converges until interval is less than 0.01 wide
+--
 -- Parameters: @f@ (function), @target@ (goal value), @low@ and @high@ bounds
 bisect :: (Double -> Double) -> Double -> Double -> Double -> Double
 bisect f target low high
@@ -55,7 +57,9 @@ bisect f target low high
 -- | Predict race time for a given VDOT and distance
 --
 -- Given VDOT and target distance, computes time in sec
+--
 -- Uses 'bisect' to invert 'calculateVDOT' since no closed-form inverse exists
+--
 -- Search range: VDOT equivalent of 00:03:20 1500m and 07:00:00 marathon
 --
 -- Returns an error if the result is outside the valid range
