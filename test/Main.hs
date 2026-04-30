@@ -53,7 +53,6 @@ runTimeTests = testGroup "RunTime"
   [ testCase "showRunTime formats sub one minute" $ RT.showRunTime (secToRunTime 59) @?= pack "0:59"
   , testCase "showRunTime formats one hour" $ RT.showRunTime (secToRunTime 3600) @?= pack "1:00:00"
   , QC.testProperty "seconds to runtime inversion confirmation" prop_secondsToRunTime_Inversion
-  , QC.testProperty "formatRunTime . runTimeToSec round-trip" prop_formatRunTimeRoundTrip_composition
   ]
 
 vdotTests :: TestTree
@@ -98,9 +97,3 @@ prop_calculatePaces_zoneCount (NonNegative vdot) =
 prop_secondsToRunTime_Inversion :: NonNegative Int -> Property
 prop_secondsToRunTime_Inversion (NonNegative totalSeconds) =
   runTimeToSec (secToRunTime totalSeconds) === totalSeconds
-
-prop_formatRunTimeRoundTrip_composition :: NonNegative Int -> Property
-prop_formatRunTimeRoundTrip_composition (NonNegative totalSeconds) =
-  let rt = secToRunTime totalSeconds
-      formatted = RT.showRunTime rt
-  in formatted === RT.showRunTime (secToRunTime totalSeconds)
