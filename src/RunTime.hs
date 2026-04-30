@@ -20,24 +20,28 @@ data RunTime
   | HMS Int Int Int
   deriving (Show, Eq)
 
--- | Convert run time to total seconds
+-- | Convert RunTime to total seconds
 --
 -- Handles both MS (minutes:seconds) and HMS (hours:minutes:seconds) formats
 runTimeToSec :: RunTime -> Int
 runTimeToSec (MS m s)    = m * 60 + s
 runTimeToSec (HMS h m s) = h * 3600 + m * 60 + s
 
--- | Format seconds as text
+-- | Convert total seconds to RunTime
 --
--- Returns h:mm:ss format if hours > 0, otherwise m:ss format.
---
--- Minutes and seconds are zero padded
-formatRunTime :: Int -> Text
-formatRunTime totalSeconds = pack $
-  if hours > 0
-    then printf "%d:%02d:%02d" hours mins secs
-    else printf "%d:%02d" mins secs
+-- Handles both MS (minutes:seconds) and HMS (hours:minutes:seconds) formats
+secToRunTime :: Int -> RunTime
+secToRunTime totalSeconds
+  | hours > 0 = HMS hours mins secs
+  | otherwise = MS mins secs
   where
     hours = totalSeconds `div` 3600
-    mins = (totalSeconds `mod` 3600) `div` 60
-    secs = totalSeconds `mod` 60
+    mins  = (totalSeconds `mod` 3600) `div` 60
+    secs  = totalSeconds `mod` 60
+
+-- | Format Runtime as Text
+--
+-- Minutes and seconds are zero padded
+showRunTime :: RunTime -> Text
+showRunTime (MS m s)    = pack $ printf "%d:%02d" m s
+showRunTime (HMS h m s) = pack $ printf "%d:%02d:%02d" h m s

@@ -96,11 +96,13 @@ buildResultPage runTime raceDistance =
   where
     totalSeconds = fromIntegral (RT.runTimeToSec runTime)
     vdot = calculateVDOT totalSeconds raceDistance
+
     raceTableOrError =
       sequence [ case equivalentTime vdot (presetDistance preset) of
           Left err   -> Left err
-          Right time -> Right (presetLabel preset, RT.formatRunTime time)
+          Right time -> Right (presetLabel preset, RT.secToRunTime time)
         | preset <- presetRaceDistances ]
+
     intervalPaces = calculatePaces vdot
 
 app :: Application
