@@ -30,7 +30,7 @@ vdotErrorText TimeOutOfRange =
 --
 -- Formula: @VO2 cost = 0.182258 * v + 0.000104 * v^2 - 4.60@
 -- where @v@ is velocity (m/min), adjusted by duration factor
-calculateVDOT :: Double -> RaceDistance -> VDOT
+calculateVDOT :: VDOT -> RaceDistance -> VDOT
 calculateVDOT time distance = o2cost / dropDead
   where
     t = time / 60
@@ -46,7 +46,7 @@ calculateVDOT time distance = o2cost / dropDead
 -- Converges until interval is less than 0.01 wide
 --
 -- Parameters: @f@ (function), @target@ (goal value), @low@ and @high@ bounds
-bisect :: (Double -> Double) -> Double -> Double -> Double -> Double
+bisect :: (VDOT -> VDOT) -> VDOT -> VDOT -> VDOT -> VDOT
 bisect f target low high
   | (high - low) < 0.01 = mid
   | f mid > target = bisect f target mid high
