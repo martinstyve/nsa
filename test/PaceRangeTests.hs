@@ -1,9 +1,10 @@
 module PaceRangeTests (paceRangeTests) where
 
-import           Test.Tasty
-import           Test.Tasty.HUnit
+import           Test.Tasty            (testGroup, TestTree)
+import           Test.Tasty.HUnit      (testCase, (@?=))
 import           Test.Tasty.QuickCheck as QC
-import           PaceRange
+
+import           PaceRange             (calculatePaces, toPace, Zone)
 
 paceRangeTests :: TestTree
 paceRangeTests = testGroup "PaceRange"

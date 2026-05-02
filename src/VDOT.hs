@@ -8,8 +8,8 @@ Formulas based on Jack Daniels' running research via [Larry Simpson's implementa
 -}
 module VDOT where
 
-import           Data.Text (Text, pack)
-import           RaceDistance
+import           Data.Text    (Text, pack)
+import           RaceDistance ( distanceNumerical, RaceDistance )
 
 -- | VO2 max equivalent value in ml/kg/minute
 type VDOT = Double

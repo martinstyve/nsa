@@ -1,12 +1,14 @@
 module ParserTests (parserTests) where
 
 import           Data.Text             (pack)
+import           Test.Tasty            (TestTree, testGroup)
+import           Test.Tasty.HUnit      (testCase, (@?=))
+import           Test.Tasty.QuickCheck as QC (NonNegative (NonNegative),
+                                              Property, testProperty, (===))
+
 import           Parser
-import           RunTime as RT
-import           RaceDistance
-import           Test.Tasty
-import           Test.Tasty.HUnit
-import           Test.Tasty.QuickCheck as QC
+import           RaceDistance          (RaceDistance (CustomDistance, FiveK))
+import           RunTime               as RT (RunTime (MS), secToRunTime, showRunTime)
 
 parserTests :: TestTree
 parserTests = testGroup "Parser"

@@ -1,9 +1,10 @@
 module VDOTTests (vdotTests) where
 
-import           Test.Tasty
-import           Test.Tasty.HUnit
-import           RaceDistance
-import           VDOT
+import           Test.Tasty       (TestTree, testGroup)
+import           Test.Tasty.HUnit (assertFailure, testCase, (@?=))
+
+import           RaceDistance     (RaceDistance (CustomDistance, FiveK), distanceNumerical)
+import           VDOT             (calculateVDOT, equivalentTime)
 
 vdotTests :: TestTree
 vdotTests = testGroup "VDOT"

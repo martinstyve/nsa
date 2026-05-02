@@ -7,15 +7,14 @@ module App where
 
 import           Data.Text                (Text)
 import           Lucid                    (Html)
-import           Network.Wai
-import           Network.Wai.Handler.Warp
+import           Network.Wai.Handler.Warp (run)
 import           Servant
-import           Servant.HTML.Lucid
+import           Servant.HTML.Lucid       (HTML)
 
-import           Html
-import           PaceRange
+import           Html                     (index, indexMaybeError, resultPage)
+import           PaceRange                (calculatePaces)
 import           Parser                   as P
-import           RaceDistance
+import           RaceDistance             as RD
 import           RunTime                  as RT
 import           VDOT
 
@@ -88,7 +87,7 @@ validateParams _ _ _ = Left MissingRequiredInput
 unwrapCustomDist :: CustomDistanceParam -> Text
 unwrapCustomDist (CustomDistanceParam customDistText) = customDistText
 
-buildResultPage :: RT.RunTime -> RaceDistance -> Either AppError (Html ())
+buildResultPage :: RT.RunTime -> RD.RaceDistance -> Either AppError (Html ())
 buildResultPage runTime raceDistance =
   case raceTableOrError of
     Left err        -> Left (VdotCalculationError err)
@@ -96,7 +95,6 @@ buildResultPage runTime raceDistance =
   where
     totalSeconds = fromIntegral (RT.runTimeToSec runTime)
     vdot = calculateVDOT totalSeconds raceDistance
-
     raceTableOrError =
       sequence [ case equivalentTime vdot (presetDistance preset) of
           Left err   -> Left err

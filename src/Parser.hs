@@ -2,14 +2,14 @@
 
 module Parser where
 
-import           Data.List.NonEmpty   as NE
-import           Data.Set             as Set
-import           Data.Text
+import           Data.List.NonEmpty as NE (toList)
+import           Data.Set as Set          (toList)
+import           Data.Text                (strip, Text)
 import           Text.Megaparsec
-import           Text.Megaparsec.Char
+import           Text.Megaparsec.Char     (char, digitChar)
 
-import           RunTime
-import           RaceDistance
+import           RunTime                  (RunTime(..))
+import           RaceDistance             (RaceDistance(..))
 
 data InputError
   = InvalidSeconds

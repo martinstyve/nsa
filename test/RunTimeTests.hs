@@ -1,10 +1,12 @@
 module RunTimeTests (runTimeTests) where
 
 import           Data.Text             (pack)
-import           Test.Tasty
-import           Test.Tasty.HUnit
-import           Test.Tasty.QuickCheck as QC
-import           RunTime as RT
+import           Test.Tasty            (TestTree, testGroup)
+import           Test.Tasty.HUnit      (testCase, (@?=))
+import           Test.Tasty.QuickCheck as QC (NonNegative (NonNegative),
+                                              Property, testProperty, (===))
+
+import           RunTime               as RT (runTimeToSec, secToRunTime, showRunTime)
 
 runTimeTests :: TestTree
 runTimeTests = testGroup "RunTime"

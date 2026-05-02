@@ -3,13 +3,14 @@
 
 module Html where
 
-import           Data.Text (Text)
+import           Data.Text     (Text)
 import           Lucid
-import           PaceRange
-import           RaceDistance
-import           RunTime as RT
-import           VDOT
-import Text.Printf
+import           Text.Printf   (printf)
+
+import           PaceRange     (PaceRange(intensity, minPace, maxPace, name))
+import           RaceDistance  (presetRaceDistances, RaceDistancePreset(presetLabel, presetValue))
+import           RunTime as RT (RunTime, secToRunTime, showRunTime)
+import           VDOT          (VDOT)
 
 index :: Html ()
 index = indexMaybeError Nothing
