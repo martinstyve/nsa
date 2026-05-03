@@ -1,5 +1,6 @@
 module Main where
 
+import AppTests (appTests)
 import ParserTests (parserTests)
 import PaceRangeTests (paceRangeTests)
 import RunTimeTests (runTimeTests)
@@ -11,4 +12,4 @@ main = defaultMain tests
 
 -- split into what module it tests
 tests :: TestTree
-tests = testGroup "nsa" [parserTests, paceRangeTests, runTimeTests, vdotTests]
+tests = testGroup "nsa" [appTests, parserTests, paceRangeTests, runTimeTests, vdotTests]
