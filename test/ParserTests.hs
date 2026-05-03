@@ -25,6 +25,7 @@ parserTests = testGroup "Parser"
   , testCase "parseCustomDistance accepts lower bound" $ parseCustomDistance (pack "1") @?= Right 1
   , testCase "parseCustomDistance rejects zero" $ parseCustomDistance (pack "0") @?= Left InvalidCustomDistance
   , testCase "parseCustomDistance rejects values above max" $ parseCustomDistance (pack "50001") @?= Left InvalidCustomDistance
+  , testCase "parseCustomDistance strips whitespace" $ parseCustomDistance (pack "     8000     ") @?= Right 8000
   , testCase "resolveDistanceSelection rejects missing custom value" $ resolveDistanceSelection (pack "custom") Nothing @?= Left MissingCustomDistance
   , testCase "resolveDistanceSelection accepts custom value" $ resolveDistanceSelection (pack "custom") (Just (pack "4200")) @?= Right (CustomDistance 4200)
   , testCase "resolveDistanceSelection trims surrounding whitespace" $ resolveDistanceSelection (pack "  custom  ") (Just (pack "4200")) @?= Right (CustomDistance 4200)

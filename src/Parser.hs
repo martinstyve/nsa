@@ -66,7 +66,7 @@ parseDistance :: Text -> Either InputError RaceDistance
 parseDistance = either (Left . bundleToInputError InvalidDistance) Right . runParser distanceParser ""
 
 parseCustomDistance :: Text -> Either InputError Int
-parseCustomDistance = either (Left . bundleToInputError InvalidCustomDistance) Right . runParser customDistanceParser ""
+parseCustomDistance = either (Left . bundleToInputError InvalidCustomDistance) Right . runParser customDistanceParser "" . strip
 
 resolveDistanceSelection :: Text -> Maybe Text -> Either InputError RaceDistance
 resolveDistanceSelection selected maybeCustomDist =
