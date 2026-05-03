@@ -8,11 +8,13 @@ import           Test.Tasty.QuickCheck as QC (NonNegative (NonNegative),
 
 import           Parser
 import           RaceDistance          (RaceDistance (CustomDistance, FiveK))
-import           RunTime               as RT (RunTime (MS), secToRunTime, showRunTime)
+import           RunTime               as RT (RunTime (HMS, MS), secToRunTime,
+                                              showRunTime)
 
 parserTests :: TestTree
 parserTests = testGroup "Parser"
   [ testCase "parseTime accepts mm:ss upper bound" $ parseTime (pack "5:59") @?= Right (MS 5 59)
+  , testCase "parseTime accepts h:mm:ss" $ parseTime (pack "1:02:03") @?= Right (HMS 1 2 3)
   , testCase "parseTime rejects invalid seconds" $ parseTime (pack "5:61") @?= Left InvalidSeconds
   , testCase "parseTime rejects invalid minutes in h:mm:ss" $ parseTime (pack "1:60:00") @?= Left InvalidMinutes
   , testCase "parseTime rejects too many time parts" $ parseTime (pack "1:02:03:04") @?= Left InvalidFormat
@@ -24,6 +26,7 @@ parserTests = testGroup "Parser"
   , testCase "parseCustomDistance rejects values above max" $ parseCustomDistance (pack "50001") @?= Left InvalidCustomDistance
   , testCase "resolveDistanceSelection rejects missing custom value" $ resolveDistanceSelection (pack "custom") Nothing @?= Left MissingCustomDistance
   , testCase "resolveDistanceSelection accepts custom value" $ resolveDistanceSelection (pack "custom") (Just (pack "4200")) @?= Right (CustomDistance 4200)
+  , testCase "resolveDistanceSelection trims surrounding whitespace" $ resolveDistanceSelection (pack "  custom  ") (Just (pack "4200")) @?= Right (CustomDistance 4200)
   , QC.testProperty "formatRunTime round-trips through parseTime" prop_formatRunTimeRoundTrip
   ]
 
