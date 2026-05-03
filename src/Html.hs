@@ -1,11 +1,17 @@
 {-# LANGUAGE BlockArguments    #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{-| Module      : Html
+Description : Render the calculator pages
+
+Builds the input and result pages for the VDOT calculator using Lucid,
+including the form, result tables, and supporting description text
+-}
 module Html where
 
 import           Data.Text     (Text)
-import           Lucid
 import           Text.Printf   (printf)
+import           Lucid
 
 import           PaceRange     (PaceRange(intensity, minPace, maxPace, name))
 import           RaceDistance  (presetRaceDistances, RaceDistancePreset(presetLabel, presetValue))
@@ -16,6 +22,7 @@ index :: Html ()
 index = indexMaybeError Nothing
 
 
+-- | Render the input page without an error message
 indexMaybeError :: Maybe Text -> Html ()
 indexMaybeError maybeError = do
   html_ do
@@ -57,9 +64,7 @@ indexMaybeError maybeError = do
           a_ [href_ "https://www.reddit.com/r/NorwegianSinglesRun/wiki/index/", target_ "_blank"] "Reddit"
           " Wiki."
 
--- todo ?
--- RaceTime :: Text
--- or InputTime :: Text
+-- | Render the result page with the calculated VDOT, race table, and pace ranges
 resultPage :: VDOT -> [(Text, RT.RunTime)] -> [PaceRange] -> Html ()
 resultPage vdot raceTable intervalPaces = do
   html_ do
@@ -87,12 +92,13 @@ resultPage vdot raceTable intervalPaces = do
         div_ [style_ "margin-top: 20px;"] $ 
           a_ [href_ "/"] "Go Back"
 
+-- | Render one equivalent race time row
 raceRow :: (Text, RT.RunTime) -> Html ()
 raceRow (label, rt) = tr_ do
   td_ (toHtml label)
   td_ (toHtml (RT.showRunTime rt))
 
--- rendering training zones
+-- | Render one training pace range row
 trainingSection :: PaceRange -> Html ()
 trainingSection pace = tr_ do
   td_ (toHtml (name pace))
