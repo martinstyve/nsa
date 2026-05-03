@@ -11,10 +11,6 @@ This project was created for INF221 Advanced Functional Programming @ UiB (and p
 
 try it out: [nsa.martinstyve.no](https://nsa.martinstyve.no/)
 
-## Features
-
-todo?
-
 ## Tech Stack
 
 - Haskell
@@ -57,7 +53,7 @@ cabal test
 	- h:mm:ss (example: 1:24:10)
 - Distance:
 	- preset values from the dropdown
-	- custom distance in meters (1 to 50000 for now)
+	- custom distance in meters (1 to 50000)
 
 ## Personal note
 
