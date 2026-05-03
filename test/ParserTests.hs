@@ -15,6 +15,7 @@ parserTests :: TestTree
 parserTests = testGroup "Parser"
   [ testCase "parseTime accepts mm:ss upper bound" $ parseTime (pack "5:59") @?= Right (MS 5 59)
   , testCase "parseTime accepts h:mm:ss" $ parseTime (pack "1:02:03") @?= Right (HMS 1 2 3)
+  , testCase "parseTime strips whitespace" $ parseTime (pack "   5:30   ") @?= Right (MS 5 30)
   , testCase "parseTime rejects invalid seconds" $ parseTime (pack "5:61") @?= Left InvalidSeconds
   , testCase "parseTime rejects invalid minutes in h:mm:ss" $ parseTime (pack "1:60:00") @?= Left InvalidMinutes
   , testCase "parseTime rejects too many time parts" $ parseTime (pack "1:02:03:04") @?= Left InvalidFormat

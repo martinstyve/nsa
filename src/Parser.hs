@@ -60,7 +60,7 @@ customDistanceParser = do
     else customFailure InvalidCustomDistance
 
 parseTime :: Text -> Either InputError RunTime
-parseTime = either (Left . bundleToInputError InvalidFormat) Right . runParser timeParser ""
+parseTime = either (Left . bundleToInputError InvalidFormat) Right . runParser timeParser "" . strip
 
 parseDistance :: Text -> Either InputError RaceDistance
 parseDistance = either (Left . bundleToInputError InvalidDistance) Right . runParser distanceParser ""
